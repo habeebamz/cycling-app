@@ -29,15 +29,9 @@ services:
     startCommand: npx turbo run start --filter=web
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          name: cycling-api
-          type: web
-          property: host
+        value: https://cycling-app-nj8k.onrender.com
       - key: NEXT_PUBLIC_SOCKET_URL
-        fromService:
-          name: cycling-api
-          type: web
-          property: host
+        value: https://cycling-app-nj8k.onrender.com
       - key: NEXT_PUBLIC_SITE_URL
         value: https://cycling-web.onrender.com # Update this after first deploy
       - key: NODE_VERSION

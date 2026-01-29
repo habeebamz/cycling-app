@@ -50,8 +50,8 @@ PORT=4000
 Navigate to `apps/web/` and create a `.env.local` file.
 ```env
 # API URL (Where your backend is running)
-NEXT_PUBLIC_API_URL=http://localhost:4000
-NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
+NEXT_PUBLIC_API_URL=https://cycling-app-nj8k.onrender.com
+NEXT_PUBLIC_SOCKET_URL=https://cycling-app-nj8k.onrender.com
 
 # Site Metadata
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
@@ -126,8 +126,8 @@ The easiest way to deploy this monorepo is using **Render Blueprints**.
 - **Build Command**: `npm install && npx turbo run build --filter=web`
 - **Start Command**: `npx turbo run start --filter=web`
 - **Environment Variables**:
-  - `NEXT_PUBLIC_API_URL`: (The URL of your deployed API)
-  - `NEXT_PUBLIC_SOCKET_URL`: (The URL of your deployed API)
+  - `NEXT_PUBLIC_API_URL`: `https://cycling-app-nj8k.onrender.com`
+  - `NEXT_PUBLIC_SOCKET_URL`: `https://cycling-app-nj8k.onrender.com`
   - `NEXT_PUBLIC_SITE_URL`: (The URL of your deployed web app)
 
 ---
