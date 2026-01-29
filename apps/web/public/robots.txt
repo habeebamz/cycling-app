@@ -1,0 +1,21 @@
+# Robots.txt for CyclingApp
+# Allow search engines to crawl public content
+
+User-agent: *
+
+# Allow public cyclist profiles
+Allow: /cyclist/
+
+# Disallow private/dashboard pages
+Disallow: /dashboard/
+Disallow: /hradmin/
+Disallow: /api/
+
+# Disallow search result pages (to avoid duplicate content)
+Disallow: /cyclist/search
+
+# Allow all other public pages
+Allow: /
+
+# Sitemap location
+Sitemap: http://localhost:3000/sitemap.xml

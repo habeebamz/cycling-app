@@ -1,0 +1,44 @@
+services:
+  # Backend API
+  - type: web
+    name: cycling-api
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx turbo run build --filter=api
+    startCommand: node apps/api/dist/index.js
+    disk:
+      name: sqlite-data
+      mountPath: /opt/render/project/src/apps/api/prisma
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        value: file:/opt/render/project/src/apps/api/prisma/dev.db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 4000
+      - key: NODE_VERSION
+        value: 20
+
+  # Frontend Web
+  - type: web
+    name: cycling-web
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx turbo run build --filter=web
+    startCommand: npx turbo run start --filter=web
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          name: cycling-api
+          type: web
+          property: host
+      - key: NEXT_PUBLIC_SOCKET_URL
+        fromService:
+          name: cycling-api
+          type: web
+          property: host
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://cycling-web.onrender.com # Update this after first deploy
+      - key: NODE_VERSION
+        value: 20

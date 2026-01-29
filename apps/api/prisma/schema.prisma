@@ -1,0 +1,367 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String  @id @default(uuid())
+  email     String  @unique
+  username  String  @unique
+  password  String? // Nullable for OAuth users
+  resetPasswordToken String?
+  resetPasswordExpires DateTime?
+  role      String  @default("USER") // USER, ADMIN, MANAGER, EDITOR
+  status    String  @default("ACTIVE") // ACTIVE, SUSPENDED, PENDING
+  isVerified Boolean @default(false)
+  firstName String?
+  lastName  String?
+  city      String?
+  state     String?
+  country   String?
+  bikeModel String?
+  bio       String?
+  image     String?
+  isPublic  Boolean @default(true)
+  facebook  String?
+  instagram String?
+
+  // Private fields
+  dob    DateTime?
+  gender String?
+  weight Float?
+  height Float?
+
+  // Settings
+  notificationsEnabled Boolean @default(true)
+  eventRemindersEnabled Boolean @default(true)
+
+  // Stats
+  totalDistance       Float @default(0)
+  longestRideDistance Float @default(0)
+
+  // Relations
+  activities              Activity[]
+  followedBy              Follows[]              @relation("following")
+  following               Follows[]              @relation("follower")
+  groups                  GroupMember[]
+  events                  EventParticipant[]
+  createdEvents           Event[]                @relation("EventCreator")
+  createdChallenges       Challenge[]
+  participatingChallenges ChallengeParticipant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notifications Notification[]
+  likes         ActivityLike[]
+  comments      ActivityComment[]
+
+  posts           Post[]
+  postLikes       PostLike[]
+  postComments    PostComment[]
+  violationReportsSubmitted ViolationReport[] @relation("reporter")
+  violationReportsReceived  ViolationReport[] @relation("reportedUser")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String // NEW_RECORD, FOLLOW, EVENT_INVITE, LIKE, COMMENT, ACTIVITY
+  message   String
+  link      String?
+  imageUrl  String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Follows {
+  follower    User   @relation("follower", fields: [followerId], references: [id])
+  followerId  String
+  following   User   @relation("following", fields: [followingId], references: [id])
+  followingId String
+
+  @@id([followerId, followingId])
+}
+
+model Activity {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  title        String?
+  description  String?
+  distance     Float // in km
+  duration     Int // in seconds
+  calories     Float?
+  avgPower     Float?
+  maxPower     Float?
+  avgHeartRate Float?
+  maxHeartRate Float?
+  elevationGain Float    @default(0) // in meters
+
+  gpsData String? // GeoJSON or encoded polyline (Stored as string for SQLite)
+  images  String? // JSON string of image URLs
+
+  source         String? // manual, garmin, strava, etc.
+  isPersonalBest Boolean @default(false)
+
+  startTime DateTime
+  endTime   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  likes    ActivityLike[]
+  comments ActivityComment[]
+  violationReports ViolationReport[]
+}
+
+model ActivityLike {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  activityId String
+  activity  Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, activityId])
+}
+
+model ActivityComment {
+  id        String   @id @default(uuid())
+  text      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  activityId String
+  activity  Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Group {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  image       String?
+  profileImage String?
+  type        String  @default("GROUP") // GROUP, CLUB
+  isPrivate   Boolean @default(false)
+  status      String  @default("ACTIVE") // ACTIVE, SUSPENDED
+  isVerified  Boolean @default(false)
+
+  members    GroupMember[]
+  events     Event[]
+  challenges Challenge[]
+  posts      Post[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  violationReports ViolationReport[]
+}
+
+model GroupMember {
+  id      String @id @default(uuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id])
+  role    String @default("MEMBER") // ADMIN, MEMBER
+  status  String @default("ACTIVE") // ACTIVE, SUSPENDED
+  
+  violationCount Int       @default(0)
+  banExpiresAt   DateTime?
+  
+  banAppealMessage String?
+  banAppealStatus  String   @default("NONE") // NONE, PENDING, RESOLVED
+  
+  notificationsEnabled Boolean @default(true)
+
+  joinedAt DateTime @default(now())
+
+  @@unique([userId, groupId])
+}
+
+model Event {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime?
+  location    String?
+  image       String?
+  profileImage String?
+  isPrivate   Boolean @default(false)
+  status      String  @default("SCHEDULED") // SCHEDULED, CANCELLED, SUSPENDED
+
+  groupId String?
+  group   Group?  @relation(fields: [groupId], references: [id])
+
+  creatorId String @default("legacy_user")
+  creator   User   @relation("EventCreator", fields: [creatorId], references: [id])
+
+  participants EventParticipant[]
+  badges       Badge[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  violationReports ViolationReport[]
+}
+
+model EventParticipant {
+  id      String @id @default(uuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  status  String @default("GOING") // GOING, INTERESTED, NOT_GOING
+  role    String @default("MEMBER") // OWNER, ADMIN, MANAGER, MEMBER
+  notificationsEnabled Boolean @default(true)
+
+  joinedAt DateTime @default(now())
+
+  @@unique([userId, eventId])
+}
+
+model Badge {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  image       String
+
+  eventId String?
+  event   Event?  @relation(fields: [eventId], references: [id])
+
+  criteria String? // e.g. { "minDistance": 500, "startDate": "...", "endDate": "..." }
+
+  createdAt DateTime @default(now())
+}
+
+model Challenge {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  type        String // DISTANCE, TIME, RIDES
+  condition   String @default("ACCUMULATIVE") // ACCUMULATIVE, SINGLE
+  goal        Float // e.g. 500 (km), 3600 (seconds)
+  startDate   DateTime
+  endDate     DateTime
+  image       String?
+  trophyImage String?
+  isPrivate   Boolean  @default(false)
+  
+  groupId String?
+  group   Group?  @relation(fields: [groupId], references: [id])
+
+  creatorId String
+  creator   User   @relation(fields: [creatorId], references: [id])
+
+  participants ChallengeParticipant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChallengeParticipant {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+
+  progress  Float    @default(0)
+  completed Boolean  @default(false)
+  joinedAt  DateTime @default(now())
+
+  @@unique([userId, challengeId])
+}
+
+model Post {
+  id        String   @id
+  content   String
+  image     String?
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id])
+  
+  likes     PostLike[]
+  comments  PostComment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  violationReports ViolationReport[]
+}
+
+model PostLike {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model PostComment {
+  id        String   @id @default(uuid())
+  text      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model SystemSetting {
+  key   String @id
+  value String
+}
+
+model ViolationReport {
+  id          String   @id @default(uuid())
+  reason      String
+  details     String?
+  status      String   @default("PENDING") // PENDING, RESOLVED, DISMISSED
+  
+  reporterId  String
+  reporter    User     @relation("reporter", fields: [reporterId], references: [id])
+  
+  // Relations (Only one should be set)
+  postId      String?
+  post        Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  targetUserId String?
+  targetUser   User?    @relation("reportedUser", fields: [targetUserId], references: [id])
+
+  activityId   String?
+  activity     Activity? @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  groupId      String?
+  group        Group?    @relation(fields: [groupId], references: [id])
+
+  eventId      String?
+  event        Event?    @relation(fields: [eventId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([reporterId])
+  @@index([postId])
+  @@index([targetUserId])
+  @@index([activityId])
+  @@index([groupId])
+  @@index([eventId])
+}
