@@ -1,0 +1,30 @@
+
+> web@0.1.0 build
+> next build
+
+▲ Next.js 16.1.5 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 7.5s
+  Running TypeScript ...
+Failed to compile.
+
+./src/app/hradmin/challenges/page.tsx:77:33
+Type error: Type 'null' is not assignable to type 'string | undefined'.
+
+[0m [90m 75 |[39m                         [33m<[39m[33mdiv[39m onClick[33m=[39m{e [33m=>[39m e[33m.[39mstopPropagation()}[33m>[39m
+ [90m 76 |[39m                             [33m<[39m[33mCreateChallengeForm[39m
+[31m[1m>[22m[39m[90m 77 |[39m                                 groupId[33m=[39m{[36mnull[39m} [90m// Global Challenge[39m
+ [90m    |[39m                                 [31m[1m^[22m[39m
+ [90m 78 |[39m                                 onSuccess[33m=[39m{() [33m=>[39m {
+ [90m 79 |[39m                                     setShowCreate([36mfalse[39m)[33m;[39m
+ [90m 80 |[39m                                     fetchChallenges()[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path H:\cycling-app\apps\web
+npm error workspace web@0.1.0
+npm error location H:\cycling-app\apps\web
+npm error command failed
+npm error command C:\Windows\system32\cmd.exe /d /s /c next build

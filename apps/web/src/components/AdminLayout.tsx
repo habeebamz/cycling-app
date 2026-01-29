@@ -16,11 +16,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         if (!loading) {
             if (!user) {
                 router.push('/hradmin/login');
-            } else if (!user.role || !['ADMIN', 'MANAGER', 'EDITOR'].includes(user.role)) {
+            } else if (!user.role || !['ADMIN', 'MANAGER', 'EDITOR'].includes(user.role as string)) {
                 router.push('/dashboard');
             } else {
                 // Role-based redirects for inner pages
-                if (user.role && ['MANAGER', 'EDITOR'].includes(user.role)) {
+                if (user.role && ['MANAGER', 'EDITOR'].includes(user.role as string)) {
                     const restrictedPaths = ['/hradmin', '/hradmin/analysis', '/hradmin/users', '/hradmin/challenges', '/hradmin/activities', '/hradmin/settings'];
                     if (restrictedPaths.includes(pathname)) {
                         router.push('/hradmin/groups');

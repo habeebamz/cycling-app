@@ -23,7 +23,7 @@ export default function EventsManagement() {
     });
 
     useEffect(() => {
-        if (!loading && user && ['ADMIN', 'MANAGER', 'EDITOR'].includes(user.role)) {
+        if (!loading && user && ['ADMIN', 'MANAGER', 'EDITOR'].includes(user.role as string)) {
             fetchEvents();
         }
     }, [user, loading]);

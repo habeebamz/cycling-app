@@ -13,7 +13,7 @@ export default function ViolationsManagement() {
     const [filter, setFilter] = useState('PENDING');
 
     useEffect(() => {
-        if (!loading && user && user.role && ['ADMIN', 'MANAGER', 'EDITOR'].includes(user.role)) {
+        if (!loading && user && ['ADMIN', 'MANAGER', 'EDITOR'].includes(user.role as string)) {
             fetchReports();
         }
     }, [user, loading]);

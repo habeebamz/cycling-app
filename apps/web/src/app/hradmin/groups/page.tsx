@@ -18,7 +18,7 @@ export default function GroupsManagement() {
     const [formData, setFormData] = useState({ name: '', description: '', type: 'GROUP', isPrivate: false, image: '', profileImage: '' });
 
     useEffect(() => {
-        if (!loading && user && ['ADMIN', 'MANAGER', 'EDITOR'].includes(user.role)) {
+        if (!loading && user && ['ADMIN', 'MANAGER', 'EDITOR'].includes(user.role as string)) {
             fetchGroups();
         }
     }, [user, loading]);
