@@ -128,7 +128,8 @@ The easiest way to deploy this monorepo is using **Render Blueprints**.
 - **Environment Variables**:
   - `NEXT_PUBLIC_API_URL`: `https://cycling-app-nj8k.onrender.com`
   - `NEXT_PUBLIC_SOCKET_URL`: `https://cycling-app-nj8k.onrender.com`
-  - `NEXT_PUBLIC_SITE_URL`: (The URL of your deployed web app)
+  ### VPS Deployment
+For manual deployment on a VPS (like Hostinger, DigitalOcean, or AWS), see our detailed [VPS Deployment Guide](file:///h:/cycling-app/docs/vps-deployment.md).
 
 ---
 
